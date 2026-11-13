@@ -1,0 +1,129 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,graphicx,booktabs,array,amsmath,amssymb,xcolor,caption,fancyhdr,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!55!black,citecolor=blue!45!black]{hyperref}
+\hypersetup{pdftitle={Online Machine Learning with River and CapyMOA},pdfauthor={Tianyi LIANG}}
+\graphicspath{{../results/figures/}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{nosep,leftmargin=15pt}
+\captionsetup{font=small,labelfont=bf,skip=4pt,hypcap=false}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Online Machine Learning with River and CapyMOA}\fancyhead[R]{\small Tianyi LIANG}\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\newcommand{\resulttable}[3]{\begin{center}\captionof{table}{#2}\label{tab:#1}\vspace{2pt}{\fontsize{7.3}{9}\selectfont\setlength{\tabcolsep}{3.2pt}\input{../results/tables/#1.tex}}\end{center}}
+\newcommand{\resultfigure}[3]{\begin{center}\includegraphics[width=#3\linewidth]{#1.pdf}\captionof{figure}{#2}\label{fig:#1}\end{center}}
+\begin{document}
+\thispagestyle{empty}
+{\LARGE\bfseries Online Machine Learning\\[3pt]with River and CapyMOA}\par
+{\large A step-by-step experimental study}\par
+Tianyi LIANG \hfill 13 November 2026\\
+M2 Data Science, Institut Polytechnique de Paris
+\vspace{5pt}\hrule\vspace{5pt}
+\textbf{Scope.} This report follows Steps 1--9 and optional Step 10 of the lab \cite{lab}: prediction, computational cost, drift handling, streaming clustering and online AutoML. All results come from saved experimental outputs. The repository includes code, dependency locks, predictions, figures and this \LaTeX{} source.\par
+\input{abstract-results.tex}
+\section{Steps 1 and 7: environment and shared evaluation}
+River provides incremental Python learners; CapyMOA connects Python to MOA and other learning backends \cite{river,capymoa}. Experiments use River 0.26.1, CapyMOA 0.15.1, Python 3.11.18, OpenJDK 17.0.18 and scikit-learn 1.9.1 on an Apple M4 Pro with 48 GiB RAM. Each run executes in a separate process, sequentially, with numerical thread limits set to one and a 2 GiB Java heap limit. Installation checks cover regression, classification, drift updates, clustering, Jupyter execution and HTML export.
+
+\textbf{Data coverage.} All real datasets in Table~\ref{tab:data} are used in full. Chronological sources retain their order. Phishing and BreastCancer have no assumed temporal ordering, so their complete rows are permuted independently using seed 42. Identical cached streams are supplied to both libraries. Seed 42 controls data generation/permutation and stochastic learners; temporal real streams retain their source chronology.
+\begin{center}\captionof{table}{Supervised data. Counts include the 50-instance training-only warm-up.}\label{tab:data}
+\small\begin{tabular}{llrrl}\toprule
+Task & Dataset & $N$ & Features & Stream order / target\\\midrule
+Regression & TrumpApproval & 1,001 & 6 & Time / approval rating\\
+& ChickWeights & 578 & 5 & Time / chick weight\\
+& BikeDaily (UCI) & 731 & 34 & Date / daily rental count\\
+& FriedmanShift & 10,000 & 10 & Generated / continuous response\\\midrule
+Classification & Elec2 & 45,312 & 8 & Source order / price direction\\
+& Phishing & 1,250 & 9 & Seeded permutation / website class\\
+& BreastCancer & 569 & 30 & Seeded permutation / diagnosis\\
+& SEAReversal & 10,000 & 3 & Generated / binary concept\\\bottomrule
+\end{tabular}\end{center}
+TrumpApproval and ChickWeights are supplied by River; BikeDaily is the 731-row daily file of the UCI Bike Sharing collection \cite{datasets,bike}. Phishing and Elec2 use River's copies. BreastCancer uses scikit-learn's 569-row Wisconsin Diagnostic dataset \cite{sklearn}. Chick identity is excluded and diet is one-hot encoded. Bike calendar/weather categories are one-hot encoded; the ID, date and target components \texttt{casual} and \texttt{registered} are excluded. The latter two would reveal the rental-count target through their sum.
+
+\textbf{Warm-up and scaling.} The first 50 observations train each learner but are not scored. Feature means and population standard deviations are fitted only on this prefix and then held fixed. Regression targets are standardized with the same prefix; predictions are converted back to original units for evaluation. This avoids future-data leakage and keeps stored KNN observations in a fixed coordinate system.
+
+\textbf{Evaluation.} The fixed seed is 42. For each scored example, predict before training. Regression reports MAE, RMSE and $R^2$ in original target units; classification reports accuracy, macro-F1 and Cohen's $\kappa$. Missing predictions map to class 0 or the warm-up target mean. A single fixed seed meets the lab's reproducibility requirement; these results do not estimate between-seed variation.
+
+\textbf{Cost.} Latency includes input conversion, prediction, learning and any detector/reset operation. It excludes shared loading/scaling, package/JVM startup, warm-up, final scoring and disk output. Evaluation runtime also includes bookkeeping and memory sampling. Whole-process RSS is sampled every 250 examples and at completion; it includes Python/JVM overhead and may miss short-lived peaks. No hyperparameter search is performed.
+\clearpage
+\section{Steps 2--3: River regression comparison}
+The four families are HoeffdingTreeRegressor (HT), Adaptive Random Forest (ARF, ten trees), LinearRegression with Adam(.01) and intercept step .01, and KNNRegressor ($k=5$, recent window 500). Trees use mean leaves, grace period 50, $\delta=10^{-7}$ and tie threshold .05. ARF retains native random subspaces, resampling and internal drift handling. HT partitions the feature space incrementally, Adam fits a linear response, and KNN adapts by forgetting old examples.
+\resulttable{regression}{Full-stream prequential regression with seed 42. RSS is sampled whole-process MiB. Lower MAE/RMSE and higher $R^2$ are better.}{unused}
+\resultfigure{regression-learning}{Cumulative RMSE over the complete scored stream, seed 42. The dotted vertical line marks the synthetic change at index 5000. Each panel has its own target units and vertical scale.}{.94}
+\input{regression-analysis.tex}
+\clearpage
+\section{Step 4: regression drift detection and handling}
+The synthetic response follows $f(x)=10\sin(\pi x_0x_1)+20(x_2-.5)^2+10x_3+5x_4+\epsilon$, with independent uniform $[0,1]$ features and $\epsilon\sim N(0,1)$. At index 5000 the target becomes $30-f(x)$. The feature distribution remains fixed; the conditional response changes abruptly.
+
+ADWIN, Page--Hinkley and KSWIN monitor the same no-reset HT residual stream. Their input is $\min(|y_t-\hat y_t|/(3\sigma_{\rm warmup}),1)$. ADWIN compares adaptive-window means; Page--Hinkley accumulates deviations; KSWIN compares recent error distributions. Parameters are ADWIN $\delta=.002$; Page--Hinkley threshold 50, tolerance .005, forgetting .9999, minimum 30; KSWIN $\alpha=.005$, window 100, test sample 30. A detector restarts after an alarm.
+\resulttable{regression-drift}{Detector-only alarms on the common HT error trace, and separate live-reset effects. Pre counts alarms before the known change; Hit indicates whether an alarm occurs after the known change; Delay counts subsequent examples. $\Delta$ is relative RMSE reduction versus no-reset HT (positive is better). Post metric is reset-policy post-change RMSE. Real-stream delay is undefined.}{unused}
+\resultfigure{regression-drift}{Top: 250-instance rolling RMSE for the no-reset HT and live reset policies (seed 42). Bottom: detector-only alarm positions on the unchanged baseline error trace. These two panels evaluate distinct detector uses.}{.94}
+\input{regression-drift-analysis.tex}
+\clearpage
+\section{Step 5a: River classification comparison}
+Classification compares HT, ADWIN bagging (ten HT members), logistic regression with Adam(.01), and unweighted KNN ($k=5$, window 500). Trees use majority leaves, information gain, grace 50, $\delta=10^{-7}$, tie threshold .05 and no pre-pruning. Logistic regression uses intercept step .01 and no L2 penalty. The same three real streams and one synthetic stream are used for all four methods. SEAReversal samples $x\sim U([0,10]^3)$, initially assigns $y=\mathbb{1}[x_0+x_1>8]$, reverses this label at index 5000, and independently flips 5\% of labels. This deliberately controlled SEA-based drift provides a known change location while leaving $P(X)$ unchanged.
+\resulttable{classification}{River classification with seed 42. Accuracy and macro-F1 are percentages; $\kappa$ is dimensionless. Latency is the mean per example; runtime is total evaluation time. All methods observe every record after the shared training-only prefix.}{unused}
+\resultfigure{classification-learning}{Cumulative classification accuracy, seed 42. The reversal is marked at index 5000. Static datasets use a fixed row permutation.}{.94}
+\input{classification-analysis.tex}
+\clearpage
+\section{Step 5b: classification drift and recovery}
+ADWIN, DDM and EDDM receive binary prequential errors from the same no-reset HT for the detector-only comparison. DDM tracks error probability and its variability (warm-up 30 errors, warning multiplier 2, drift multiplier 3). EDDM tracks spacing between errors (warm-up 30, warning ratio .95, drift ratio .90). Parameters are not tuned to the known synthetic drift.
+
+For the handling ablation, each detector instead observes the errors of its own live HT. An alarm resets both learner and detector, then the current labeled example trains the new tree exactly once. The fixed scaler is retained. This separates \emph{detecting a change} from \emph{improving prediction after acting on it}.
+\resulttable{classification-drift}{Alarm statistics and classification reset effects. $\Delta$ is accuracy improvement in percentage points over the no-reset HT. Post metric is post-reversal accuracy in percent. Missing detections remain missing; no real-data change labels are assumed.}{unused}
+\resultfigure{classification-drift}{Top: rolling accuracy for no reset and three live reset strategies on SEAReversal. Bottom: alarms obtained from the common no-reset error trace. Results shown for seed 42; the table reports the same run.}{.94}
+\input{classification-drift-analysis.tex}
+\clearpage
+\section{Step 8: River versus CapyMOA}
+Both libraries receive the same arrays, feature scaling, warm-up and observation order. CapyMOA uses HoeffdingTree, OnlineAdwinBagging, SGDClassifier with logistic loss, and KNN, matching the explicit tree settings, ensemble size, $k$ and window. Its logistic wrapper uses inverse-scaling SGD ($\eta_t=.01/t^{.5}$), not Adam \cite{sgd}. This is a closest-equivalent linear-family comparison; native split observers, distance normalization, random-number generators and internal drift logic can also differ. Table~\ref{tab:cross-library} pairs results by dataset and model family. R/C is River latency divided by CapyMOA latency; values above one favor CapyMOA on this machine. The accuracy difference is CapyMOA minus River. The paired linear implementations intentionally retain their native optimizers as documented in the model descriptions.
+\resulttable{cross-library}{Cross-library accuracy and processing latency. Accuracy is in percent; latency is mean microseconds per example. Differences in native learner implementations remain part of the comparison.}{unused}
+\resultfigure{cross-library}{Accuracy--cost trade-offs. Colors identify learner families; circles denote River and triangles CapyMOA. Horizontal axes are logarithmic. Each point is one complete seed-42 run.}{.94}
+\input{cross-library-analysis.tex}
+\clearpage
+\section{Step 9: streaming clustering}
+Three CapyMOA methods process full Iris (150 rows, labels hidden) and MovingBlobs (6000 two-dimensional points). MovingBlobs contains three equally sampled Gaussian groups with noise SD .55; their centers translate by $(3,1.5)$ at index 3000. CluStream maintains 30 microclusters and extracts $k=3$ macroclusters. ClusTree uses horizon 1000 and maximum height 3. DenStream uses $\epsilon=.6$, $\beta=.2$, $\mu=2$, initialization 50, offline multiplier 2, decay .01 and speed 100; all methods use horizon 1000 where applicable.
+
+After a 50-point warm-up, \emph{block-prequential} evaluation freezes current centers, assigns the next 25 Iris or 250 MovingBlobs points, evaluates them, and only then trains on that block. Labels are used solely for ARI, never learner updates. Metrics are silhouette, adjusted Rand index (ARI), and squared nearest-center distance; undefined values remain missing. ClusTree exposes microcenters, unlike the other macrocluster partitions. Nearest-center assignment evaluates DenStream's centers, not its native noise rejection. A constant Java class placeholder is used for transport only.
+\resulttable{clustering}{Weighted block-quality means, for seed 42. Lower squared distance is better; higher silhouette and ARI are better. Clustering latency includes center extraction and quality computation, unlike supervised latency.}{unused}
+\resultfigure{cluster-evolution}{Quality and partition size over MovingBlobs (seed 42). The dotted line marks the center translation; the block beginning 2800 spans that change.}{.95}
+\resultfigure{cluster-snapshots}{CluStream centers (black crosses) before training each displayed block, overlaid on the next held-out points. Point colors/shapes indicate reference groups solely for visualization. Coordinates use the fixed warm-up scaler.}{.95}
+\input{clustering-analysis.tex}
+\clearpage
+\section{Step 10 (bonus): online AutoML comparison}
+CapyMOA's BanditClassifier uses an $\epsilon$-greedy allocation policy ($\epsilon=.1$, burn-in 100). SuccessiveHalvingClassifier starts with the same candidate pool, ranks candidates and progressively eliminates them ($\eta=2$, budget 12000 model updates, minimum one model) \cite{automl}. The pool consists of the four configured CapyMOA classifiers from Step 8. Both selectors see every stream observation, although they allocate training updates differently across candidates. The comparison covers two AutoML approaches supplied by CapyMOA; it does not evaluate AutoClass.
+\resulttable{automl}{AutoML and the highest-accuracy static candidate for each dataset. The static reference is selected retrospectively from Step 8 and is not an online selection algorithm. All values use seed 42.}{unused}
+\resultfigure{automl}{Left: response to the SEA label reversal for two static references and two AutoML selectors (seed 42). Right: AutoML latency across the four streams; the vertical cost axis is logarithmic.}{.95}
+\input{automl-analysis.tex}
+\clearpage
+\section{Step 6: synthesis, reproducibility and conclusions}
+\input{conclusions.tex}
+\subsection{Reproducing the submission}
+The repository contains configuration and dataset manifests, predictions and timings, detector positions, plotting code, an executed notebook, HTML export and this report source. Reproduce from the root:
+\begin{verbatim}
+conda env create -f environment.yml
+conda activate online-ml-lab
+python src/data.py
+python src/run_experiments.py
+python scripts/analyze_results.py
+python scripts/build_results_notebook.py
+bash scripts/build_report.sh
+\end{verbatim}
+The completed matrix has 86 runs: 16 regression, 32 classification, 24 resets, 6 clustering and 8 AutoML, plus 24 detector-only replays. Validation recomputes predictive metrics, checks fingerprints, and confirms paired labels and stream order. Latency traces and exact alarm indices remain available for audit.
+\par\vspace{5pt}
+\noindent\begin{minipage}[t]{.44\linewidth}\vspace{0pt}
+\includegraphics[width=\linewidth]{results-notebook.jpg}
+\captionof{figure}{Actual executed-notebook screenshot: Elec2 results on 45,262 scored observations. Accuracy is a fraction; latency is in microseconds and runtime in seconds.}
+\end{minipage}\hfill
+\begin{minipage}[t]{.52\linewidth}\vspace{0pt}
+\begin{thebibliography}{9}\fontsize{8.5}{10}\selectfont\setlength{\itemsep}{0pt}
+\bibitem{lab} M. Barry and M. Togbe. \emph{Lab: Online Machine Learning with River and CapyMOA}. Course handout, 9 Nov. 2026.
+\bibitem{river} J. Montiel et al. \emph{River: machine learning for streaming data in Python}. arXiv:2012.04740, 2020. \href{https://arxiv.org/abs/2012.04740}{Paper}.
+\bibitem{capymoa} H. M. Gomes et al. \emph{CapyMOA: Efficient Machine Learning for Data Streams and Online Continual Learning in Python}. arXiv:2502.07432, 2025/2026. \href{https://arxiv.org/abs/2502.07432}{Paper}.
+\bibitem{datasets} River developers. Dataset implementations and API documentation. \href{https://riverml.xyz/latest/api/datasets/Elec2/}{Dataset API}; pinned River 0.26.1 source.
+\bibitem{bike} H. Fanaee-T. \emph{Bike Sharing}. UCI Machine Learning Repository. \href{https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset}{Dataset record}.
+\bibitem{sklearn} Scikit-learn developers. Wisconsin Diagnostic Breast Cancer and Iris dataset documentation. \href{https://scikit-learn.org/stable/datasets/toy_dataset.html}{Dataset guide}.
+\bibitem{sgd} CapyMOA developers. \emph{SGDClassifier} API and implementation. \href{https://capymoa.org/api/modules/capymoa.classifier.SGDClassifier.html}{API documentation}.
+\bibitem{automl} CapyMOA developers. \emph{Automated machine learning} tutorial. \href{https://capymoa.org/v0.15.0/notebooks/automl/automl.html}{Versioned tutorial}.
+\end{thebibliography}
+\end{minipage}
+\end{document}

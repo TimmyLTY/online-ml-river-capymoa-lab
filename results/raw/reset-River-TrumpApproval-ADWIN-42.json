@@ -1,0 +1,28 @@
+{
+  "phase": "reset",
+  "task": "regression",
+  "library": "River",
+  "dataset": "TrumpApproval",
+  "model": "ADWIN",
+  "seed": 42,
+  "fingerprint": "507ae095d9bc189fd60e5aec22264ba5ebd9efa2d26f837dd28602aa9e0d1c4a",
+  "mae": 0.9686036581682436,
+  "rmse": 1.266518863902047,
+  "r2": 0.4342866058919913,
+  "n_total": 1001,
+  "n_test": 951,
+  "warmup": 50,
+  "init_s": 0.04472058289684355,
+  "runtime_s": 0.07609162502922118,
+  "latency_us": 79.80150683491063,
+  "p95_us": 35.0625,
+  "rss_baseline_mib": 159.421875,
+  "rss_peak_mib": 159.640625,
+  "rss_growth_mib": 0.21875,
+  "alarms": [
+    401
+  ],
+  "status": "completed",
+  "execution_fingerprint": "d28a2f43268bc54a27d9ee9b79055e1827640611f234633baf16375df9708927",
+  "scope_revision": "results/protocol-revision.json"
+}

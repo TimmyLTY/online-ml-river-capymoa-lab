@@ -1,0 +1,38 @@
+[
+  {
+    "start": 50,
+    "end": 75,
+    "n_centers": 1,
+    "occupied": 1,
+    "prequential_mse": 3.9363304881215835,
+    "ari": 0.0,
+    "silhouette": null
+  },
+  {
+    "start": 75,
+    "end": 100,
+    "n_centers": 2,
+    "occupied": 2,
+    "prequential_mse": 1.269846555507999,
+    "ari": 0.5367192862045299,
+    "silhouette": 0.6026806521876015
+  },
+  {
+    "start": 100,
+    "end": 125,
+    "n_centers": 2,
+    "occupied": 2,
+    "prequential_mse": 2.276929530420662,
+    "ari": 0.6056782334384858,
+    "silhouette": 0.555490135543769
+  },
+  {
+    "start": 125,
+    "end": 150,
+    "n_centers": 2,
+    "occupied": 2,
+    "prequential_mse": 1.3980060500588423,
+    "ari": 0.6770141754889647,
+    "silhouette": 0.6121543109299524
+  }
+]

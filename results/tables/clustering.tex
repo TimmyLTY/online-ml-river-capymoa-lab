@@ -1,0 +1,12 @@
+\begin{tabular}{llrrrrrr}
+\toprule
+Dataset & Method & Silhouette & ARI & Dist.$^2$ & Time(s) & $\mu$s/ex. & RSS \\
+\midrule
+Iris & CluStream & 0.445 & 0.641 & 1.004 & 0.07 & 688.9 & 296 \\
+Iris & ClusTree & 0.167 & 0.209 & 0.273 & 0.03 & 337.7 & 271 \\
+Iris & DenStream & 0.590 & 0.455 & 2.220 & 1.37 & 13704.2 & 309 \\
+MovingBlobs & CluStream & 0.728 & 0.890 & 0.342 & 0.38 & 63.6 & 306 \\
+MovingBlobs & ClusTree & 0.249 & 0.428 & 0.055 & 0.21 & 34.7 & 297 \\
+MovingBlobs & DenStream & 0.415 & 0.237 & 2.304 & 1.00 & 168.6 & 294 \\
+\bottomrule
+\end{tabular}

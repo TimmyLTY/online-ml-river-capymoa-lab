@@ -14,3 +14,8 @@ artifacts/*
 validation-results/*
 !validation-results/.gitkeep
 *.log
+report/build/
+*.aux
+*.out
+*.toc
+*.synctex.gz

@@ -1,77 +1,90 @@
 # Online Machine Learning with River and CapyMOA
 
-Course lab repository for Tianyi LIANG (M2 Data Science, Institut Polytechnique de Paris).
+**Tianyi LIANG · M2 Data Science, Institut Polytechnique de Paris**
 
-**Status:** environment preparation only. Full experiments and the final report
-have not started. The small synthetic runs in `check_environment.py` are
-installation checks, not experimental results.
+Completed course lab with a concise **9-page English report**, editable LaTeX,
+executed notebook, and reproducible experiments. The main analysis uses the
+single fixed random seed **42**. All selected real datasets are used in full.
 
-## Setup
+## Deliverables
 
-Use Conda/Miniforge with the conda-forge channel:
+- [PDF report](report/report.pdf) — Steps 1–9 and Step 10 AutoML bonus.
+- [LaTeX source](report/main.tex) — compiled with `scripts/build_report.sh`.
+- [Executed results notebook](notebooks/01_lab_results.ipynb).
+- [Notebook HTML export](results/lab_results.html) — download and open locally.
+- [Experiment protocol](docs/protocol.md) and [step coverage](docs/lab-checklist.md).
+- [Per-run measurements](results/tables/runs.csv), [exact detector alarms](results/tables/detector-alarms.json),
+  [metric validation](results/validation.json), [report/notebook checks](results/artifact-validation.json), and [data manifest](results/data-manifest.json).
+
+The experiment matrix contains **86 completed runs**: 16 River regression,
+32 classification across both libraries, 24 detector/reset policies, 6 streaming
+clustering runs, and 8 AutoML runs. Another 24 detector-only replays compare
+alarms on identical baseline error traces. Raw `.npz` files retain predictions,
+true labels, indices, and per-instance latency; JSON files record metrics,
+configuration identity, memory, and timing.
+
+## Reproduce
 
 ```bash
 conda env create -f environment.yml
 conda activate online-ml-lab
 python scripts/register_kernel.py
-python -m pip check
 python check_environment.py
-jupyter lab
+python src/data.py
+python src/run_experiments.py
+python scripts/export_model_configs.py
+python scripts/analyze_results.py
+python scripts/verify_results.py
+python scripts/build_results_notebook.py
+bash scripts/build_report.sh
 ```
 
-Select **Online ML Lab (River + CapyMOA)** and open
-`notebooks/00_environment_check.ipynb`.
+The final command needs a LaTeX installation with `pdflatex`, `geometry`,
+`lmodern`, `microtype`, `booktabs`, `amsmath`, `amssymb`, `caption`, `fancyhdr`,
+`enumitem` and `hyperref`. On macOS the script also recognizes
+`/Library/TeX/texbin/pdflatex`. A notebook screenshot is retained as a captured
+artifact in `results/figures/`; the numerical tables/plots are generated from
+saved run outputs.
 
-The environment includes Python 3.11, OpenJDK 17, River, CapyMOA, JupyterLab,
-plotting tools, and HTML notebook export. Conda activation configures Java;
-kernel registration also records this environment's Java location so the
-kernel works when Jupyter is launched from another environment. PyTorch is
-optional for CapyMOA's deep-learning methods and is not installed at this stage.
+`src/run_experiments.py` runs isolated workers sequentially, with numerical
+threads limited to one. It resumes only matching source/config/data fingerprints.
+Removing existing raw results forces fresh measurements; timing values will vary
+with hardware and desktop load. `results/protocol-revision.json` documents the
+user-requested reduction from three planned seeds to seed 42 and the reuse of
+unchanged completed seed-42 results. No seed-43 or seed-44 experiment is reported.
 
-`requirements.txt` pins direct Python dependencies. `requirements-lock.txt`
-records all pip-visible packages from the verified macOS arm64 environment.
-`conda-osx-arm64.lock.txt` records Conda packages for the same platform.
-Use `environment.yml` for portable setup; exact lock files may not work on
-other platforms. To reproduce the recorded macOS environment:
+## Experiment design
 
-```bash
-conda create -n online-ml-lab-locked --file conda-osx-arm64.lock.txt
-conda activate online-ml-lab-locked
-python -m pip install -r requirements-lock.txt
-python scripts/register_kernel.py
-python check_environment.py
-```
+- **Regression:** TrumpApproval, ChickWeights, UCI Bike Sharing daily data, and
+  FriedmanShift; HT, ten-tree ARF, LinearAdam, windowed KNN; MAE/RMSE/R2 and cost.
+- **Classification:** full Elec2, Phishing, Wisconsin Diagnostic Breast Cancer,
+  and SEAReversal; HT, ten-tree ADWIN bagging, logistic learner, windowed KNN.
+- **Drift:** ADWIN/Page–Hinkley/KSWIN for regression and ADWIN/DDM/EDDM for
+  classification; alarm positions, synthetic delay, and live reset ablations.
+- **Clustering:** CluStream, ClusTree and DenStream on Iris and MovingBlobs;
+  block-prequential evaluation, silhouette, ARI and squared nearest-center distance.
+- **AutoML:** CapyMOA Bandit and Successive Halving with the same four-model pool.
 
-The kernel registration uses the name `online-ml-lab`; running it in another
-environment intentionally updates that named kernel.
+The first 50 examples are a shared training-only warm-up. Scaling uses only this
+prefix. Both libraries receive identical stream arrays and order. The linear
+counterparts use different native optimizers (River Adam versus CapyMOA
+inverse-scaling SGD); the report explicitly limits cross-library attribution.
 
-## Working tree
+## Environment and artifacts
 
-| Path | Purpose |
-| --- | --- |
-| `check_environment.py` | Offline import, JVM, learning, and clustering checks |
-| `notebooks/00_environment_check.ipynb` | Jupyter smoke check only |
-| `scripts/register_kernel.py` | Register the project kernel with its Java settings |
-| `docs/lab-checklist.md` | Requirements and next-session checklist |
-| `data/` | Local datasets; downloads excluded from Git |
-| `src/` | Reserved for experiment implementation |
-| `artifacts/` | Generated results, figures, and notebook HTML exports |
-| `report/` | Reserved for report sources and the final PDF |
-| `validation-results/` | Local setup validation outputs |
+Python 3.11.18 · OpenJDK 17.0.18 · River 0.26.1 · CapyMOA 0.15.1.
+`requirements.txt` pins direct dependencies; `requirements-lock.txt` records the
+Python package snapshot; `conda-osx-arm64.lock.txt` records the Conda platform
+packages. Use `environment.yml` for portable setup.
 
-Dataset selection, model matching, and full evaluations will be carried out
-in the next session. Keep seeds, stream order, preprocessing, hyperparameters,
-and timing boundaries explicit when implementing them.
+Raw datasets and prepared caches stay in ignored `data/`; downloads and feature
+construction are implemented in `src/data.py`. Plot PDFs/PNGs, result records,
+the executed notebook and the report are versioned. Local build products and
+logs are ignored.
 
-## References
+To browse interactively, run `jupyter lab` and choose the kernel
+**Online ML Lab (River + CapyMOA)**. `00_environment_check.ipynb` is an installation
+check; `01_lab_results.ipynb` contains the full experiment results.
 
-- [River installation](https://riverml.xyz/latest/introduction/installation/)
-- [CapyMOA setup](https://capymoa.org/setup/)
-- Course handout: *Lab: Online Machine Learning with River and CapyMOA*,
-  9 November 2026. The handout remains outside this public repository.
-
-## Submission target
-
-The final deliverables are a 5–10 page PDF report and either exported notebook
-HTML or a code repository link. The course deadline is **20 November 2026,
-23:59 CET**. This repository is a preparation scaffold, not a completed submission.
+The handout's deadline is **20 November 2026, 23:59 CET**. The repository and PDF
+are prepared; email and Moodle submission remain the student's actions.

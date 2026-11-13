@@ -1,0 +1,31 @@
+{
+  "phase": "reset",
+  "task": "classification",
+  "library": "River",
+  "dataset": "Phishing",
+  "model": "EDDM",
+  "seed": 42,
+  "fingerprint": "507ae095d9bc189fd60e5aec22264ba5ebd9efa2d26f837dd28602aa9e0d1c4a",
+  "accuracy": 0.7583333333333333,
+  "f1": 0.7468103929968337,
+  "kappa": 0.4982004429678848,
+  "n_total": 1250,
+  "n_test": 1200,
+  "warmup": 50,
+  "init_s": 0.04314375016838312,
+  "runtime_s": 0.025120249949395657,
+  "latency_us": 20.720858333333332,
+  "p95_us": 15.0,
+  "rss_baseline_mib": 159.390625,
+  "rss_peak_mib": 159.515625,
+  "rss_growth_mib": 0.125,
+  "alarms": [
+    126,
+    193,
+    354,
+    423
+  ],
+  "status": "completed",
+  "execution_fingerprint": "d28a2f43268bc54a27d9ee9b79055e1827640611f234633baf16375df9708927",
+  "scope_revision": "results/protocol-revision.json"
+}

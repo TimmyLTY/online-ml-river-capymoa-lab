@@ -1,0 +1,64 @@
+{
+  "seeds": [
+    42
+  ],
+  "warmup": 50,
+  "synthetic_n": 10000,
+  "drift_index": 5000,
+  "regression": [
+    "TrumpApproval",
+    "ChickWeights",
+    "BikeDaily",
+    "FriedmanShift"
+  ],
+  "classification": [
+    "Elec2",
+    "Phishing",
+    "BreastCancer",
+    "SEAReversal"
+  ],
+  "regressors": [
+    "HT",
+    "ARF",
+    "LinearAdam",
+    "KNN"
+  ],
+  "classifiers": [
+    "HT",
+    "Bagging",
+    "Logistic",
+    "KNN"
+  ],
+  "regression_detectors": [
+    "ADWIN",
+    "PageHinkley",
+    "KSWIN"
+  ],
+  "classification_detectors": [
+    "ADWIN",
+    "DDM",
+    "EDDM"
+  ],
+  "cluster_datasets": [
+    "Iris",
+    "MovingBlobs"
+  ],
+  "clusterers": [
+    "CluStream",
+    "ClusTree",
+    "DenStream"
+  ],
+  "automl": [
+    "Bandit",
+    "SuccessiveHalving"
+  ],
+  "knn_k": 5,
+  "knn_window": 500,
+  "ensemble_size": 10,
+  "tree_grace_period": 50,
+  "tree_delta": 1e-07,
+  "tree_tau": 0.05,
+  "linear_learning_rate": 0.01,
+  "jvm_args": "-Xmx2g -Xss10M",
+  "threads": 1
+}

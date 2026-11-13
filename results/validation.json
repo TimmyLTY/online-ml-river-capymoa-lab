@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "runs_checked": 86,
+  "detector_replays_checked": 24,
+  "checks": [
+    "complete expected matrix",
+    "source/config/data fingerprint",
+    "all scored observations retained",
+    "metrics recomputed from predictions",
+    "cross-library targets and order identical",
+    "delay/missing detection consistency"
+  ],
+  "fingerprint": "507ae095d9bc189fd60e5aec22264ba5ebd9efa2d26f837dd28602aa9e0d1c4a"
+}

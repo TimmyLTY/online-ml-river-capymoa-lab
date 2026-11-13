@@ -1,0 +1,30 @@
+{
+  "phase": "reset",
+  "task": "classification",
+  "library": "River",
+  "dataset": "BreastCancer",
+  "model": "EDDM",
+  "seed": 42,
+  "fingerprint": "507ae095d9bc189fd60e5aec22264ba5ebd9efa2d26f837dd28602aa9e0d1c4a",
+  "accuracy": 0.6088631984585742,
+  "f1": 0.4482800152910804,
+  "kappa": 0.017054625180762395,
+  "n_total": 569,
+  "n_test": 519,
+  "warmup": 50,
+  "init_s": 0.045075624948367476,
+  "runtime_s": 0.025898792082443833,
+  "latency_us": 49.63703468208092,
+  "p95_us": 30.016699999999993,
+  "rss_baseline_mib": 159.921875,
+  "rss_peak_mib": 159.96875,
+  "rss_growth_mib": 0.046875,
+  "alarms": [
+    132,
+    206,
+    270
+  ],
+  "status": "completed",
+  "execution_fingerprint": "d28a2f43268bc54a27d9ee9b79055e1827640611f234633baf16375df9708927",
+  "scope_revision": "results/protocol-revision.json"
+}
