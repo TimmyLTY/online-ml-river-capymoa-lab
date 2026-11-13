@@ -127,10 +127,11 @@ part of this selected comparison. No additional hyperparameter tuning is done.
 
 ## Report
 
-The standalone project in `report/` uses pdfLaTeX and includes all figure/table
-inputs. `scripts/package_overleaf.py` packages it for Overleaf. The PDF has
-9 pages including references. Dataset caches and per-instance raw traces are
-local generated files; summary results and exact detector positions are versioned.
+The final author-supplied 9-page PDF is kept at the repository root. The
+repository does not distribute LaTeX sources, Overleaf ZIPs or compilation files.
+Use the current README to reproduce experiments; analysis creates figure/table
+inputs locally in `results/generated/`. Dataset caches and per-instance raw
+traces are also generated locally; summary evidence remains versioned.
 
 ### Clustering transport detail
 

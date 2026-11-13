@@ -10,7 +10,7 @@ __pycache__/
 data/*
 !data/README.md
 results/raw/
-report/build/
+results/generated/
 *.log
 *.aux
 *.out

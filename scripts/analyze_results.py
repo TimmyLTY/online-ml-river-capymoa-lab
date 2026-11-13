@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-RAW=ROOT/'results/raw';FIG=ROOT/'report/figures';TAB=ROOT/'results/tables';TEX=ROOT/'report/tables'
+RAW=ROOT/'results/raw';FIG=ROOT/'results/generated/figures';TAB=ROOT/'results/tables';TEX=ROOT/'results/generated/tables'
 for folder in [FIG,TAB,TEX]:folder.mkdir(parents=True,exist_ok=True)
 plt.rcParams.update({'font.size':9,'axes.titlesize':10,'axes.labelsize':9,'legend.fontsize':8,'pdf.fonttype':42,'ps.fonttype':42,'savefig.facecolor':'white','axes.spines.top':False,'axes.spines.right':False})
 COLORS=['#0072B2','#D55E00','#009E73','#CC79A7'];LINES=['-','--','-.',':']

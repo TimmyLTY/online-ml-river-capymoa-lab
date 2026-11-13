@@ -1,25 +1,16 @@
 {
-  "status": "passed",
+  "status": "author_supplied_pdf_preserved",
   "report_pages": 9,
-  "overleaf_zip_files": 18,
-  "isolated_zip_compile": "pdfLaTeX, two passes, same extracted text as delivered PDF",
-  "latex_overfull_boxes": 0,
-  "unresolved_references": false,
-  "affiliation": "ENSTA Paris",
-  "files": {
-    "report/report.pdf": "cee7c60f04068c1c70b62912bc72491cda1d20c6a104f63cd88b87dc245d18b1",
-    "report/overleaf.zip": "dacc848ab99172eb68f8743bd646b37c08b0e95735530215710494757edb8804",
-    "report/main.tex": "4ab838904bec75668b3eb4656c3ec1944b419dc5bbd7177c470a7c2a6ceecb33"
-  },
-  "visually_reviewed_pages": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9
-  ]
+  "sha256": "6bdfbb56ff69671c36a18276734fc4f3cf4ded152290defef0e6190fd7b14021",
+  "file": "Lab Online ML_Tianyi LIANG River_CapyMOA.pdf",
+  "checks": [
+    "PDF opens successfully",
+    "matches both author-provided copies byte for byte",
+    "first page visually inspected"
+  ],
+  "observations": [
+    "Page 1 contains two unresolved citation markers [?].",
+    "Page 9 references scripts/build_report.sh from the removed source package."
+  ],
+  "latex_sources_distributed": false
 }
