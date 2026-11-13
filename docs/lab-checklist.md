@@ -6,13 +6,12 @@ Author affiliation: **Tianyi LIANG — ENSTA Paris**.
 
 ## Final PDF update
 
-The original audit below describes the experiment coverage checked before the
-author's final PDF replacement. The final author-supplied PDF is preserved
-unchanged. Its first page has two unresolved citation markers `[?]`; its §9.1
-still lists `scripts/build_report.sh`, which belonged to the earlier source
-package. Follow the current README for experiment reproduction. LaTeX sources,
-Overleaf ZIPs and compilation files have been removed at the author's request.
-The final PDF has 9 pages. No new full content audit is claimed for this revision.
+The latest author-supplied PDF already resolves the two old `[?]` markers by
+removing those citations. The obsolete page-9 compilation command has now been
+removed. Pixel comparison at 144 dpi confirms pages 1–8 are identical to the
+latest supplied PDF and page 9 changes only inside that command's rectangle.
+The PDF remains 9 pages; no TeX sources, ZIPs or compilation attachments are
+tracked. Follow the current README for experiment reproduction.
 
 ## Step-by-step coverage
 

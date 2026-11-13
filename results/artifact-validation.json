@@ -1,16 +1,24 @@
 {
-  "status": "author_supplied_pdf_preserved",
+  "status": "passed",
   "report_pages": 9,
-  "sha256": "6bdfbb56ff69671c36a18276734fc4f3cf4ded152290defef0e6190fd7b14021",
   "file": "Lab Online ML_Tianyi LIANG River_CapyMOA.pdf",
+  "sha256": "75884a2b6d9837b0dd8a60ccd0a3c2e7fc041395893c6713ac709199a74a2662",
+  "source_sha256": "7b9736fbd85e6644492b81302b9481df9c043a2f3ae18915391c9e9064949e06",
   "checks": [
-    "PDF opens successfully",
-    "matches both author-provided copies byte for byte",
-    "first page visually inspected"
+    "Latest supplied PDF already contains no unresolved [?] citation markers.",
+    "Removed obsolete bash scripts/build_report.sh command from page 9.",
+    "Pixel comparison at 144 dpi: pages 1-8 identical; page 9 differs only inside the removed command rectangle."
   ],
-  "observations": [
-    "Page 1 contains two unresolved citation markers [?].",
-    "Page 9 references scripts/build_report.sh from the removed source package."
+  "changed_pixels_by_page": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1562
   ],
   "latex_sources_distributed": false
 }
