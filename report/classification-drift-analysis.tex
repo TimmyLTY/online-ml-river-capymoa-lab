@@ -1,5 +1,0 @@
-\textbf{The reset rule changes the outcome.} On the common SEAReversal baseline errors, ADWIN detects the change after 41 observations, DDM after 96 and EDDM after 253. EDDM has already raised 11 pre-change alarms. Faster detection does not translate monotonically into better accuracy once the detector is coupled to a changing learner.
-
-DDM resets raise overall accuracy from 66.96\% to 77.55\% and post-change accuracy from 60.20\% to 71.54\%. ADWIN improves the post-change portion to 66.26\%, but its overall accuracy falls slightly to 66.70\%; gains after the reversal do not offset losses elsewhere. EDDM ends at 66.04\% overall.
-
-On Elec2 all three live-reset policies are worse than retaining the HT, by 8.78, 3.18 and 6.32 percentage points for ADWIN, DDM and EDDM. Restarting repeatedly discards learned structure and imposes relearning costs. Phishing shows a different outcome: EDDM gains 8.33 points while ADWIN loses 8.83. These comparisons support evaluating a complete detector--learner policy, rather than selecting a detector solely by its alarm count or synthetic detection delay.

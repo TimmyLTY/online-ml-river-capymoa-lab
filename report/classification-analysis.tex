@@ -1,5 +1,0 @@
-\textbf{A fast linear model is often competitive, but locality matters.} KNN gives the highest Elec2 accuracy (87.44\%) and $\kappa$ (0.742). Its 500-example window can forget old conditions without explicit detector resets. Logistic regression is much faster (7.5 versus 97.5 microseconds), but its 70.23\% Elec2 accuracy shows the cost of the configured linear representation and optimization.
-
-On Phishing, Logistic reaches 89.00\% accuracy, slightly above KNN's 88.50\%, at about one tenth of KNN's latency. On BreastCancer the pair is nearly tied (95.76\% and 95.95\%). Both tree configurations predict the majority label for all 519 scored BreastCancer observations, giving 62.24\% accuracy and zero $\kappa$. Thus this conservative majority-leaf setup is unsuitable for the short stream, rather than evidence that all tree configurations fail on the task.
-
-On SEAReversal, Logistic and KNN achieve 89.70\% and 89.35\%, compared with 66.96\% for HT and 63.43\% for bagging. The finite KNN window and persistent Adam updates support recovery; increasing ensemble size alone does not guarantee effective adaptation under these settings.

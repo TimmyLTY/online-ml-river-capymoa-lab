@@ -1,5 +1,0 @@
-\textbf{Detection speed is not the same as adaptation benefit.} On FriedmanShift, KSWIN raises its first post-change alarm after 22 observations, ADWIN after 41, and Page--Hinkley after 187. KSWIN also produces five pre-change alarms, compared with one each for the other detectors. Learning transients can alter the error distribution even before the generating concept changes.
-
-The separate live-reset experiments reduce overall HT RMSE from 4.97 to 3.92 (ADWIN), 3.93 (Page--Hinkley) and 4.02 (KSWIN). ADWIN gives the best overall and post-change RMSE despite KSWIN's shorter baseline detection delay. KSWIN approximately doubles latency here (305 versus 155 microseconds for no reset), reflecting its distribution tests.
-
-On real streams, KSWIN resets reduce RMSE by 51.03\% on TrumpApproval and 32.49\% on BikeDaily; Page--Hinkley produces no alarms on either under the fixed threshold. None of the detectors alarms on ChickWeights, so all reset policies equal the baseline. Real-data alarm counts describe changes in prediction errors; without annotated change points they cannot measure detection precision or delay.

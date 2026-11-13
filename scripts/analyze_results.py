@@ -11,13 +11,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-RAW=ROOT/'results/raw';FIG=ROOT/'results/figures';TAB=ROOT/'results/tables'
+RAW=ROOT/'results/raw';FIG=ROOT/'report/figures';TAB=ROOT/'results/tables';TEX=ROOT/'report/tables'
+for folder in [FIG,TAB,TEX]:folder.mkdir(parents=True,exist_ok=True)
 plt.rcParams.update({'font.size':9,'axes.titlesize':10,'axes.labelsize':9,'legend.fontsize':8,'pdf.fonttype':42,'ps.fonttype':42,'savefig.facecolor':'white','axes.spines.top':False,'axes.spines.right':False})
 COLORS=['#0072B2','#D55E00','#009E73','#CC79A7'];LINES=['-','--','-.',':']
 
 
 def save(fig,name):
-    fig.savefig(FIG/(name+'.pdf'));fig.savefig(FIG/(name+'.png'),dpi=180);plt.close(fig)
+    fig.savefig(FIG/(name+'.pdf'));plt.close(fig)
 
 
 def fmt(v,d=2):return '--' if pd.isna(v) else f'{v:.{d}f}'
@@ -30,7 +31,7 @@ def pm(g,m,d=2,factor=1):
 def latex_table(name,headers,rows,align=None):
     out='\\begin{tabular}{'+(align or 'l'+'r'*(len(headers)-1))+'}\n\\toprule\n'+' & '.join(headers)+' \\\\\n\\midrule\n'
     out+='\n'.join(' & '.join(str(v) for v in row)+' \\\\' for row in rows)
-    out+='\n\\bottomrule\n\\end{tabular}\n';(TAB/(name+'.tex')).write_text(out)
+    out+='\n\\bottomrule\n\\end{tabular}\n';(TEX/(name+'.tex')).write_text(out)
 
 
 def main():
@@ -40,8 +41,6 @@ def main():
         if not p.exists():raise RuntimeError(f'Missing run {p.name}')
         r=json.loads(p.read_text());assert r['status']=='completed';records.append(r)
     df=pd.DataFrame(records);df.drop(columns=['alarms'],errors='ignore').to_csv(TAB/'runs.csv',index=False)
-    numeric=[c for c in ['mae','rmse','r2','accuracy','f1','kappa','runtime_s','latency_us','p95_us','rss_peak_mib','rss_growth_mib','silhouette','ari','prequential_mse','post_rmse','post_accuracy'] if c in df]
-    df.groupby(['phase','task','library','dataset','model'])[numeric].agg(['mean','std']).to_csv(TAB/'summary.csv')
     detection=[]
     for s in expected:
         if s['phase']!='main' or s['library']!='River' or s['model']!='HT':continue
@@ -62,9 +61,9 @@ def main():
             for m in models:
                 g=df.query('phase=="main" and library=="River" and dataset==@ds and model==@m')
                 metrics=[pm(g,v,2,100 if v in ['accuracy','f1'] else 1) for v in (['mae','rmse','r2'] if task=='regression' else ['accuracy','f1','kappa'])]
-                rows.append([ds,m,*metrics,fmt(g.latency_us.mean(),1),fmt(g.runtime_s.mean(),2),fmt(g.rss_peak_mib.mean(),0)])
+                rows.append([ds,m,*metrics,fmt(g.latency_us.mean(),1),fmt(g.runtime_s.mean(),3),fmt(g.rss_peak_mib.mean(),0)])
         latex_table(task,['Dataset','Model']+(['MAE','RMSE','$R^2$'] if task=='regression' else ['Acc. (\\%)','Macro-F1 (\\%)','$\\kappa$'])+['$\\mu$s/ex.','Time (s)','RSS (MiB)'],rows,'llrrrrrr')
-        # Cumulative curves use all seeds; SD shows joint stream/order/model variation.
+        # Cumulative curves use the configured fixed seed; optional bands apply only if more seeds are configured.
         fig,axes=plt.subplots(2,2,figsize=(7,3.35),layout='constrained')
         for ax,ds in zip(axes.flat,CFG[task]):
             for mi,m in enumerate(models):
@@ -88,8 +87,10 @@ def main():
                 post='post_'+metric
                 postval=fmt(reset[post].mean(),2) if ds in ['FriedmanShift','SEAReversal'] else '--'
                 if task=='classification' and postval!='--':postval=fmt(reset[post].mean()*100,2)
-                rows.append([ds,detname,pm(g,'n_alarms',0),fmt(g.prechange_alarms.mean(),0),('Yes' if g.detected.any() else 'No') if g.detected.notna().any() else '--',fmt(g.delay.mean(),0),fmt(change.mean(),2),postval])
-        latex_table(task+'-drift',['Dataset','Detector','Alarms','Pre','Hit','Delay','$\\Delta$ RMSE (\\%)' if task=='regression' else '$\\Delta$ acc. (pp)','Post metric'],rows,'llrrrrrr')
+                positions=g.iloc[0].positions
+                extent='--' if not positions else str(positions[0]) if len(positions)==1 else f'{positions[0]}--{positions[-1]}'
+                rows.append([ds,detname,pm(g,'n_alarms',0),extent,fmt(g.prechange_alarms.mean(),0),('Yes' if g.detected.any() else 'No') if g.detected.notna().any() else '--',fmt(g.delay.mean(),0),fmt(change.mean(),2),postval])
+        latex_table(task+'-drift',['Dataset','Detector','Alarms','First/last','Pre','Hit','Delay','$\\Delta$ RMSE (\\%)' if task=='regression' else '$\\Delta$ acc. (pp)','Post metric'],rows,'llrlrrrrr')
         ds='FriedmanShift' if task=='regression' else 'SEAReversal';seed=42
         fig,axes=plt.subplots(2,1,figsize=(7,3.6),layout='constrained',height_ratios=[2,1],sharex=True)
         for mi,name in enumerate(['None']+CFG[task+'_detectors']):
@@ -107,8 +108,8 @@ def main():
     for ds in CFG['classification']:
         for m in CFG['classifiers']:
             r=df.query('phase=="main" and dataset==@ds and model==@m and library=="River"').set_index('seed');c=df.query('phase=="main" and dataset==@ds and model==@m and library=="CapyMOA"').set_index('seed')
-            rows.append([ds,m,pm(r,'accuracy',2,100),pm(c,'accuracy',2,100),fmt((c.accuracy-r.accuracy).mean()*100,2),fmt(r.latency_us.mean(),1),fmt(c.latency_us.mean(),1),fmt(r.latency_us.mean()/c.latency_us.mean(),2)])
-    latex_table('cross-library',['Dataset','Model','River acc.','Capy acc.','$\\Delta$ pp','River $\\mu$s','Capy $\\mu$s','R/C'],rows,'llrrrrrr')
+            rows.append([ds,m,pm(r,'accuracy',2,100),pm(c,'accuracy',2,100),fmt((c.accuracy-r.accuracy).mean()*100,2),fmt(r.latency_us.mean(),1),fmt(c.latency_us.mean(),1),fmt(r.latency_us.mean()/c.latency_us.mean(),2),fmt(r.runtime_s.mean(),3),fmt(c.runtime_s.mean(),3)])
+    latex_table('cross-library',['Dataset','Model','River acc.','Capy acc.','$\\Delta$ pp','River $\\mu$s','Capy $\\mu$s','R/C','River s','Capy s'],rows,'llrrrrrrrr')
     fig,axes=plt.subplots(2,2,figsize=(7,3.15),layout='constrained')
     for ax,ds in zip(axes.flat,CFG['classification']):
         for mi,m in enumerate(CFG['classifiers']):
@@ -121,7 +122,7 @@ def main():
     for ds in CFG['cluster_datasets']:
         for name in CFG['clusterers']:
             g=df.query('phase=="clustering" and dataset==@ds and model==@name')
-            rows.append([ds,name,pm(g,'silhouette',3),pm(g,'ari',3),pm(g,'prequential_mse',3),fmt(g.runtime_s.mean(),2),fmt(g.latency_us.mean(),1),fmt(g.rss_peak_mib.mean(),0)])
+            rows.append([ds,name,pm(g,'silhouette',3),pm(g,'ari',3),pm(g,'prequential_mse',3),fmt(g.runtime_s.mean(),3),fmt(g.latency_us.mean(),1),fmt(g.rss_peak_mib.mean(),0)])
     latex_table('clustering',['Dataset','Method','Silhouette','ARI','Dist.$^2$','Time(s)','$\\mu$s/ex.','RSS'],rows,'llrrrrrr')
     fig,axes=plt.subplots(1,3,figsize=(7,2.05),layout='constrained')
     for mi,name in enumerate(CFG['clusterers']):
@@ -142,7 +143,7 @@ def main():
         static=df.query('phase=="main" and library=="CapyMOA" and dataset==@ds');best=static.groupby('model').accuracy.mean().idxmax()
         for name in [best]+CFG['automl']:
             g=df.query('dataset==@ds and library=="CapyMOA" and model==@name')
-            rows.append([ds,name+(' (best static)' if name==best else ''),pm(g,'accuracy',2,100),pm(g,'f1',2,100),fmt(g.runtime_s.mean(),2),fmt(g.latency_us.mean(),1),fmt(g.rss_peak_mib.mean(),0)])
+            rows.append([ds,name+(' (best static)' if name==best else ''),pm(g,'accuracy',2,100),pm(g,'f1',2,100),fmt(g.runtime_s.mean(),3),fmt(g.latency_us.mean(),1),fmt(g.rss_peak_mib.mean(),0)])
     latex_table('automl',['Dataset','Method','Accuracy (\\%)','Macro-F1 (\\%)','Time (s)','$\\mu$s/ex.','RSS'],rows,'llrrrrr')
     fig,axes=plt.subplots(1,2,figsize=(7,2.5),layout='constrained')
     for mi,name in enumerate(['HT','Bagging','Bandit','SuccessiveHalving']):

@@ -19,8 +19,8 @@ checksums, feature names, sample counts, source links, ordering and known drifts
 | MovingBlobs | 6000 | Explicit generator in `src/data.py` | Three Gaussian groups; center translation at 3000 |
 
 Source dataset licenses/terms remain with their providers; this repository does
-not redistribute the original source downloads. `results/raw/` contains derived
-prediction and evaluation traces, not the full input feature tables. Consult the
+not redistribute the original source downloads. Local `results/raw/` contains derived
+prediction and evaluation traces and is not versioned. Consult the
 linked source descriptions and citations before reusing the data beyond the lab.
 
 No preprocessing fits statistics on the scored future observations. Cache files

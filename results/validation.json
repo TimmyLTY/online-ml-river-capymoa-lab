@@ -8,7 +8,10 @@
     "all scored observations retained",
     "metrics recomputed from predictions",
     "cross-library targets and order identical",
-    "delay/missing detection consistency"
+    "delay/missing detection consistency",
+    "full dataset counts and array checksums",
+    "latency aggregates from stored traces",
+    "weighted clustering metrics from held-out blocks"
   ],
   "fingerprint": "507ae095d9bc189fd60e5aec22264ba5ebd9efa2d26f837dd28602aa9e0d1c4a"
 }

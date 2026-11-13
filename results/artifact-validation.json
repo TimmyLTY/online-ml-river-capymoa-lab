@@ -1,6 +1,16 @@
 {
   "status": "passed",
   "report_pages": 9,
+  "overleaf_zip_files": 18,
+  "isolated_zip_compile": "pdfLaTeX, two passes, same extracted text as delivered PDF",
+  "latex_overfull_boxes": 0,
+  "unresolved_references": false,
+  "affiliation": "ENSTA Paris",
+  "files": {
+    "report/report.pdf": "cee7c60f04068c1c70b62912bc72491cda1d20c6a104f63cd88b87dc245d18b1",
+    "report/overleaf.zip": "dacc848ab99172eb68f8743bd646b37c08b0e95735530215710494757edb8804",
+    "report/main.tex": "4ab838904bec75668b3eb4656c3ec1944b419dc5bbd7177c470a7c2a6ceecb33"
+  },
   "visually_reviewed_pages": [
     1,
     2,
@@ -11,15 +21,5 @@
     7,
     8,
     9
-  ],
-  "latex_overfull_boxes": 0,
-  "unresolved_references": false,
-  "executed_notebook_cells": 16,
-  "notebook_error_outputs": 0,
-  "files": {
-    "report/report.pdf": "069382fe2e6ecc63383d52402acf5a3610715324c3203d5a8d23468ae225713d",
-    "report/main.tex": "010910801375fea9cdda79fbcb6cfd2e4872fdeecce43ba6b8ed02adc480addc",
-    "notebooks/01_lab_results.ipynb": "b237710f47d338e74c976fd1b2f092d7bd81929c7bf52da5ce593933581cfa5f",
-    "results/lab_results.html": "b100fb90fec831df6412c430c9d3d9307382d8b6d996bc253a781ae5967d0ad5"
-  }
+  ]
 }

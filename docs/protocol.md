@@ -73,7 +73,7 @@ whole-process resident memory, including Python/JVM, not model-only memory.
 Sampled peaks can miss between-sample spikes. JVM JIT and desktop load affect
 these measurements. The report uses one fixed seed (42), as requested, and
 makes no claim about between-seed variation. Previously completed seed-42 runs
-remain valid when removing the planned additional seeds; `protocol-revision.json`
+remain valid when removing the planned additional seeds; `results/protocol-revision.json`
 records this scope reduction without changing numerical measurements.
 
 ## Drift comparison and handling ablation
@@ -125,12 +125,12 @@ Compare to each static candidate, not an oracle-selected held-out model.
 This bonus compares two genuine CapyMOA AutoML approaches; AutoClass is not
 part of this selected comparison. No additional hyperparameter tuning is done.
 
-## Report budget
+## Report
 
-English LaTeX article, 10 pages maximum including references. Target 9 pages:
-protocol/data/methods 1; River regression 1; regression drift 1;
-River classification 1; classification drift 1; cross-library 1;
-clustering 1; AutoML/conclusions/reproducibility/references 1–2.
+The standalone project in `report/` uses pdfLaTeX and includes all figure/table
+inputs. `scripts/package_overleaf.py` packages it for Overleaf. The PDF has
+9 pages including references. Dataset caches and per-instance raw traces are
+local generated files; summary results and exact detector positions are versioned.
 
 ### Clustering transport detail
 
