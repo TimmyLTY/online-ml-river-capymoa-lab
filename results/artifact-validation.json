@@ -2,23 +2,12 @@
   "status": "passed",
   "report_pages": 9,
   "file": "Lab Online ML_Tianyi LIANG River_CapyMOA.pdf",
-  "sha256": "75884a2b6d9837b0dd8a60ccd0a3c2e7fc041395893c6713ac709199a74a2662",
+  "sha256": "123dff1568dd29226d06658cc719a043ca41e9bbe64a60a3bd740361298d2b0b",
   "source_sha256": "7b9736fbd85e6644492b81302b9481df9c043a2f3ae18915391c9e9064949e06",
   "checks": [
-    "Latest supplied PDF already contains no unresolved [?] citation markers.",
-    "Removed obsolete bash scripts/build_report.sh command from page 9.",
-    "Pixel comparison at 144 dpi: pages 1-8 identical; page 9 differs only inside the removed command rectangle."
+    "Report has nine pages and displays 19 November 2026.",
+    "Updated only the date operand in the first page content stream."
   ],
-  "changed_pixels_by_page": [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1562
-  ],
-  "latex_sources_distributed": false
+  "latex_sources_distributed": false,
+  "report_date": "2026-11-19"
 }
